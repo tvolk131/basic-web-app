@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "node"
+
+before_install:
+  - mysql -e 'CREATE DATABASE appName;'
+
+before_script:
+  - webpack -d
+
+script:
+  - npm test
+
+cache:
+  directories:
+    - "node_modules"
+
+services:
+  - mysql
+
+env:
+  - NODE_ENV=test
