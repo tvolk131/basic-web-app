@@ -30,7 +30,7 @@ const create = ({name, oAuthProvider, oAuthId}) => {
   });
 };
 
-const get = ({id, oAuthId, oAuthProvider}) => {
+const get = ({id, oAuthProvider, oAuthId}) => {
   if (!(id || oAuthId || oAuthProvider)) {
     throw new Error('Must provide ID or oAuth');
   }

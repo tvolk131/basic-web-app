@@ -23,7 +23,7 @@ const shouldCompress = (req, res) => {
 };
 
 // Initialize passport strategies
-require('./auth')(db.User.model);
+require('./auth')(db.User);
 
 let app = express();
 

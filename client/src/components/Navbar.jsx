@@ -15,7 +15,7 @@ const Navbar = (props) => (
     <AppBar
       title='Title'
       onLeftIconButtonTouchTap={props.openNavbar}
-      iconElementRight={props.currentUser ?
+      iconElementRight={props.user ?
         <FlatButton
           labelStyle={{ fontSize: '21px' }}
           onClick={redirectTo.bind(null, '/game')} 
@@ -24,7 +24,7 @@ const Navbar = (props) => (
       }
     />
     <Drawer docked={false} width={250} open={props.isOpen} onRequestChange={(input) => props.setNavbar(input)}>
-      {props.currentUser ?
+      {props.user ?
         <div>
           <NavLink to='/' style={navItemStyle}>
             <MenuItem onClick={props.closeNavbar} leftIcon={<Home/>}>Home</MenuItem>
@@ -54,7 +54,7 @@ const Navbar = (props) => (
 );
 
 const mapStateToProps = ({global}) => ({
-  currentUser: global.currentUser,
+  user: global.user,
   isOpen: global.navbarOpen
 });
 

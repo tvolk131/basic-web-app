@@ -7,7 +7,7 @@ export const SHOW_STATUS_MESSAGE = 'global/SHOW_STATUS_MESSAGE';
 export const HIDE_STATUS_MESSAGE = 'global/HIDE_STATUS_MESSAGE';
 
 const initialState = {
-  currentUser: null,
+  user: null,
   cardpacks: [],
   navbarOpen: false,
   statusMessage: '',
@@ -19,7 +19,7 @@ export default (state = initialState, {type, payload}) => {
   case SET_CURRENT_USER: 
     return {
       ...state,
-      currentUser: payload
+      user: payload
     };
   case OPEN_NAVBAR:
     return {

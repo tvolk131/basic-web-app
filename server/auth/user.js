@@ -6,9 +6,9 @@ module.exports = (userModel) => {
     done(null, user.id);
   });
   passport.deserializeUser((id, done) => {
-    User.findById(id).then((user) => {
+    User.get({id}).then((user) => {
       if (user) {
-        done(null, user.get());
+        done(null, user);
       } else {
         done(null, null);
       }

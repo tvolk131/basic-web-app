@@ -27,20 +27,15 @@ module.exports = (userModel) => {
     },
     (reqest, token, refreshToken, profile, done) => {
       process.nextTick(() => {
-        User.findOne({
-          where: {
-            googleId: profile.id
-          }
-        })
+        User.get({oAuthProvider: 'google', oAuthId: profile.id})
           .then((user) => {
             if (user) {
               return done(null, user);
             } else {
               User.create({
-                googleId: profile.id,
-                token: token,
                 name: profile.name.givenName + ' ' + profile.name.familyName,
-                email: profile.emails[0].value
+                oAuthProvider: 'google',
+                oAuthId: profile.id
               })
                 .then((newUser) => {
                   return done(null, newUser);

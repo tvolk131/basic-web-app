@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 class Home extends Component {
   constructor(props) {
     super(props);
-    if (!props.currentUser) {
+    if (!props.user) {
       props.history.push('/login');
     }
   }
@@ -20,10 +20,10 @@ class Home extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({});
+const mapStateToProps = ({global}) => ({
+  user: global.user
+});
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({
-  removeFriend
-}, dispatch);
+const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home);
