@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const db = require('../database');
-const store = db.store;
 const url = require('url');
 const path = require('path');
 const apiRouter = require('./apiRoutes');
@@ -26,14 +25,6 @@ const shouldCompress = (req, res) => {
 // Initialize passport strategies
 require('./auth')(db.User.model);
 
-// Sync database
-db.connection.sync().then(() => {
-  console.log('Nice! Database looks fine.');
-}).catch((err) => {
-  console.log('Uh oh. something went wrong connecting to the database.');
-  console.error(err);
-});
-
 let app = express();
 
 app.set('views', __dirname + '/views');
@@ -50,7 +41,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 // Passport and sessions
 app.use(session({
-  store,
+  store: db.store,
   secret: 'thisisasecret',
   resave: true,
   saveUninitialized: false
@@ -77,7 +68,7 @@ let io = require('socket.io')(http);
 io.use(passportSocketIo.authorize({
   key: 'connect.sid',
   secret: 'thisisasecret',
-  store,
+  store: db.store,
   passport,
   cookieParser
 }));

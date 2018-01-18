@@ -15,9 +15,6 @@ import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 import { Router, Route, browserHistory, Switch } from 'react-router';
 
-getGameState();
-getGameList();
-
 render(
   <Provider store={store}>
     <BrowserRouter basename='/'>
