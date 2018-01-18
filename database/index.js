@@ -1,10 +1,14 @@
-const User = require('./models/user');
+const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
+const uri = process.env.DB_HOST;
+const user = process.env.DB_USERNAME;
+const pass = process.env.DB_PASSWORD;
+mongoose.connect(uri, {user, pass});
 
-const store = require('./sessionStore');
-const connection = require('./connection');
+const User = require('./models/user');
+const Friend = require('./models/friend');
 
 module.exports = {
   User,
-  store,
-  connection
+  Friend
 };

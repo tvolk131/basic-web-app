@@ -1,78 +1,81 @@
-const db = require('../connection');
-const Sequelize = require('sequelize');
-const maxThemeId = 4; // Defines number of client-side themes that exist
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
-const UserModel = db.define('users', {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
-  },
-  googleId: {
-    type: Sequelize.STRING,
-    unique: true
-  },
-  name: {
-    type: Sequelize.STRING,
-    notEmpty: true,
-    allowNull: false
-  },
-  email: {
-    type: Sequelize.STRING,
-    validate: {
-      isEmail: true
-    }
-  },
-  password: {
-    type: Sequelize.STRING
-  },
-  themeId: {
-    type: Sequelize.INTEGER,
-    defaultValue: 1
-  }
+const User = new Schema({
+  name: String,
+  oAuthProvider: String,
+  oAuthId: String
 });
+User.index({oAuthProvider: 1, oAuthId: 1}, {unique: true});
+const UserModel = mongoose.model('User', User);
 
-let User = {model: UserModel};
-
-// Accepts a user's email and returns the
-// user stored in the database
-//
-// Exceptions:
-// 1. userEmail does not map to any existing users
-User.getByEmail = (email) => {
-  return User.model.findOne({
-    where: {email},
-    attributes: {
-      exclude: ['password']
-    }
-  })
-    .then((user) => {
-      if (!user) {
-        return Promise.reject('User does not exist');
-      }
-      return user;
-    });
-};
-
-User.changeTheme = (userId, themeId) => {
-  if (!themeId || themeId.constructor !== Number || themeId < 0 || themeId > maxThemeId) {
-    return Promise.reject('Theme ID must be a number between zero and ' + maxThemeId);
+const create = ({name, oAuthProvider, oAuthId}) => {
+  if (!(name && oAuthId && oAuthProvider)) {
+    return Promise.reject('Not all fields were provided');
   }
-  return User.getById(userId)
-    .then((user) => {
-      return user.update({themeId});
+
+  return new Promise((resolve, reject) => {
+    let user = new UserModel();
+    user.name = name;
+    user.oAuthId = oAuthId;
+    user.oAuthProvider = oAuthProvider;
+    user.save((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(user);
+      }
     });
+  });
 };
 
-User.getById = (userId) => {
-  return User.model.findById(userId, {
-    attributes: {
-      exclude: ['password']
-    }
-  })
-    .then((user) => {
-      return user ? user : Promise.reject('User does not exist');
+const get = ({id, oAuthId, oAuthProvider}) => {
+  if (!(id || oAuthId || oAuthProvider)) {
+    throw new Error('Must provide ID or oAuth');
+  }
+  if ((!id && oAuthId && oAuthProvider) && (id && !oAuthId && !oAuthProvider)) {
+    throw new Error('Must provide either ID or oAuth, not both');
+  }
+  let query = id ? { _id: id } : { oAuthId, oAuthProvider };
+
+
+  return new Promise((resolve, reject) => {
+    UserModel.findOne(query, (err, user) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(user);
+      }
     });
+  });
 };
 
-module.exports = User;
+const setName = ({id, oAuthId, oAuthProvider}, name) => {
+  if (!(id || oAuthId || oAuthProvider)) {
+    throw new Error('Must provide ID or oAuth');
+  }
+  if ((!id && oAuthId && oAuthProvider) && (id && !oAuthId && !oAuthProvider)) {
+    throw new Error('Must provide either ID or oAuth, not both');
+  }
+  let query = id ? { _id: id } : { oAuthId, oAuthProvider };
+  return new Promise((resolve, reject) => {
+    UserModel.update(query, { $set: { name } }, {}, (err, results) => {
+      if (err) {
+        reject(err);
+      } else if (results.n < 1) {
+        reject('No user was found');
+      } else if (results.n > 1) {
+        reject('Somehow more than one user was updated');
+      } else {
+        resolve(!!results.nModified);
+      }
+    });
+  });
+};
+
+module.exports = {
+  create,
+  get,
+  setName
+};

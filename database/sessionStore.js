@@ -1,4 +1,8 @@
 const session = require('express-session');
-const Store = require('connect-session-sequelize')(session.Store);
-const connection = require('./connection');
-module.exports = new Store({db: connection});
+const uri = require('./config.json')[process.env.NODE_ENV];
+const MongoDBStore = require('connect-mongodb-session')(session);
+
+module.exports = new MongoDBStore({
+  uri,
+  collection: 'sessions'
+});
