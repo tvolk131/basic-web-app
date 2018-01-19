@@ -13,6 +13,8 @@ const passportSocketIo = require('passport.socketio');
 const socketHandler = require('./socketHandler.js');
 const compression = require('compression');
 const session = require('express-session');
+const graphQLSchema = require('./graphql');
+const expressGraphQL = require('express-graphql');
 
 const shouldCompress = (req, res) => {
   if (req.headers['x-no-compression']) {
@@ -50,6 +52,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Setup auth and api routing
+app.use('/graphql', expressGraphQL((request, response, graphQLParams) => (
+  {schema: graphQLSchema, graphiql: !(process.env.NODE_ENV === 'production')}
+)));
 app.use('/api', apiRouter(socketHandler));
 app.use('/', authRouter); // Middleware redirector
 
