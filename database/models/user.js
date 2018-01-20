@@ -74,8 +74,21 @@ const setName = ({id, oAuthId, oAuthProvider}, name) => {
   });
 };
 
+const mapFromIds = (userIds) => {
+  return new Promise((resolve, reject) => {
+    User.model.find({$or: userIds.map((_id) => ({_id}))}, (err, users) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(users);
+      }
+    });
+  });
+};
+
 module.exports = {
   create,
   get,
-  setName
+  setName,
+  mapFromIds
 };
