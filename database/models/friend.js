@@ -46,56 +46,28 @@ const getFriendData = (userId) => {
   });
 };
 
-const assertUsersExist = (userIds) => {
-  return Promise.all(userIds.map((userId) => {
-    return User.get({id: userId})
-      .then(user => {
-        if (!user) {
-          return Promise.reject('User does not exist');
-        }
-      });
-  }))
-    .then(() => {
-      return undefined;
+const getFriends = (userId) => {
+  return getFriendData(userId)
+    .then(({friends}) => {
+      return User.mapFromIds(friends);
     });
 };
 
-
-
-const getFriends = (userId) => {
-  return new Promise((resolve, reject) => {
-    getFriendData(userId)
-      .then(({friends}) => {
-        FriendModel.find({_id: { $in: Object.keys(friends)}}, (err, friends) => {
-          resolve(friends);
-        });
-      });
-  });
-};
-
 const getSentRequests = (userId) => {
-  return new Promise((resolve, reject) => {
-    getFriendData(userId)
-      .then(({sent}) => {
-        FriendModel.find({_id: { $in: Object.keys(sent)}}, (err, friends) => {
-          resolve(friends);
-        });
-      });
-  });
+  return getFriendData(userId)
+    .then(({sent}) => {
+      return User.mapFromIds(sent);
+    });
 };
 
 const getReceivedRequests = (userId) => {
-  return new Promise((resolve, reject) => {
-    getFriendData(userId)
-      .then(({received}) => {
-        FriendModel.find({_id: { $in: Object.keys(received)}}, (err, friends) => {
-          resolve(friends);
-        });
-      });
-  });
+  return getFriendData(userId)
+    .then(({received}) => {
+      return User.mapFromIds(received);
+    });
 };
 
-const sendRequest = (senderId, receiverId) => {
+const addUser = (adderId, addeeId) => {
   return new Promise((resolve, reject) => {
     let request = new FriendModel();
     request.senderId = senderId;
@@ -109,16 +81,23 @@ const sendRequest = (senderId, receiverId) => {
     });
   });
 };
-const acceptRequest = (acceptorId, senderId) => {};
-const denyRequest = (denierId, senderId) => {};
-const removeFriend = (removerId, senderId) => {};
+
+const removeUser = (senderId, receiverId) => {
+  return new Promise((resolve, reject) => {
+    FriendModel.remove({$or: [{senderId, receiverId}, {senderId: receiverId, receiverId: senderId}]}, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
 
 module.exports = {
   getFriends,
   getSentRequests,
   getReceivedRequests,
-  sendRequest,
-  acceptRequest,
-  denyRequest,
-  removeFriend
+  addUser,
+  removeUser
 };
