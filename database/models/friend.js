@@ -75,7 +75,7 @@ const getAll = (userId) => {
     .then(([sent, received, friends]) => ({sent, received, friends}));
 };
 
-const addUser = (adderId, addeeId) => {
+const addUser = (senderId, receiverId) => {
   return new Promise((resolve, reject) => {
     let request = new FriendModel();
     request.senderId = senderId;
@@ -84,7 +84,7 @@ const addUser = (adderId, addeeId) => {
       if (err) {
         reject(err);
       } else {
-        resolve(user);
+        resolve();
       }
     });
   });

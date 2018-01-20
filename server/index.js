@@ -63,7 +63,7 @@ app.get('*/bundle.js', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/bundle.js'));
 });
 app.get('/*', (req, res) => {
-  db.Friend.getAll()
+  db.Friend.getAll(req.user.id)
     .then(({sent, received, friends}) => {
       res.render('index', {
         user: JSON.stringify(req.user || null),
