@@ -24,20 +24,16 @@ const getFriendData = (userId) => {
           } else {
             requestsSent = requestsSent.map(item => item.receiverId);
             requestsReceived = requestsReceived.map(item => item.senderId);
-            let sent = {};
-            let received = {};
-            let friends = {};
-            requestsSent.forEach((item) => {
-              sent[item] = true;
-            });
-            requestsReceived.forEach((item) => {
-              if (sent[item]) {
-                delete sent[item];
-                friends[item] = true;
-              } else {
-                received[item] = true;
+            let sent = new Set(requestsSent);
+            let received = new Set(requestsReceived);
+            let friends = new Set();
+            for (let item in sent) {
+              if (received.has(item)) {
+                friends.add(item);
+                sent.delete(item);
+                received.delete(item);
               }
-            });
+            }
             resolve({sent, received, friends});
           }
         });
@@ -65,6 +61,18 @@ const getReceivedRequests = (userId) => {
     .then(({received}) => {
       return User.mapFromIds(received);
     });
+};
+
+const getAll = (userId) => {
+  return getFriendData(userId)
+    .then(({sent, received, friends}) => {
+      return Promise.all([
+        User.mapFromIds(sent),
+        User.mapFromIds(received),
+        User.mapFromIds(friends)
+      ]);
+    })
+    .then(([sent, received, friends]) => ({sent, received, friends}));
 };
 
 const addUser = (adderId, addeeId) => {
@@ -98,6 +106,7 @@ module.exports = {
   getFriends,
   getSentRequests,
   getReceivedRequests,
+  getAll,
   addUser,
   removeUser
 };

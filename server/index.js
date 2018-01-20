@@ -63,7 +63,15 @@ app.get('*/bundle.js', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/bundle.js'));
 });
 app.get('/*', (req, res) => {
-  res.render('index', {user: JSON.stringify(req.user || null)});
+  db.Friend.getAll()
+    .then(({sent, received, friends}) => {
+      res.render('index', {
+        user: JSON.stringify(req.user || null),
+        friends: JSON.stringify(friends),
+        requestsSent: JSON.stringify(sent),
+        requestsReceived: JSON.stringify(received)
+      });
+    });
 });
 
 let http = require('http').Server(app);

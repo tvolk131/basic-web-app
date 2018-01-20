@@ -75,8 +75,12 @@ const setName = ({id, oAuthId, oAuthProvider}, name) => {
 };
 
 const mapFromIds = (userIds) => {
+  userIds = Array.from(userIds);
+  if (!userIds.length) {
+    return Promise.resolve([]);
+  }
   return new Promise((resolve, reject) => {
-    User.model.find({$or: userIds.map((_id) => ({_id}))}, (err, users) => {
+    UserModel.find({$or: userIds.map((_id) => ({_id}))}, (err, users) => {
       if (err) {
         reject(err);
       } else {
