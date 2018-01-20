@@ -12,6 +12,9 @@ const initialState = {
     socket,
     statusMessage: '',
     statusVisible: false
+  },
+  friend: {
+    ...window.__PRELOADED_STATE__.friend
   }
 };
 const enhancers = [];
