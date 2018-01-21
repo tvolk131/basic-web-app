@@ -102,11 +102,45 @@ const removeUser = (senderId, receiverId) => {
   });
 };
 
+const getRelationship = (senderId, receiverId) => {
+  return new Promise((resolve, reject) => {
+    FriendModel.find({$or: [{senderId, receiverId}, {senderId: receiverId, receiverId: senderId}]}, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        switch (data.length) {
+        case 0:
+          resolve({friends: false});
+          break;
+        case 1:
+          resolve({friends: false, senderId: data[0].senderId});
+          break;
+        case 2:
+          resolve({friends: true});
+          break;
+        default:
+          relect(new Error('A database error has occured'));
+          break;
+        }
+      }
+    });
+  });
+};
+
+const areFriends = (senderId, receiverId) => {
+  return getRelationship(senderId, receiverId)
+    .then((relationship) => {
+      return relationship.friends;
+    });
+};
+
 module.exports = {
   getFriends,
   getSentRequests,
   getReceivedRequests,
   getAll,
   addUser,
-  removeUser
+  removeUser,
+  getRelationship,
+  areFriends
 };
