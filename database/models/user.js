@@ -69,7 +69,7 @@ const setName = ({id, oAuthId, oAuthProvider}, name) => {
       } else if (results.n > 1) {
         reject('Somehow more than one user was updated');
       } else {
-        resolve(!!results.nModified);
+        resolve(get({id}));
       }
     });
   }).then((data) => (execMiddleware('User.setName', data)));

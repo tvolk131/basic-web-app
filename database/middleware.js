@@ -9,9 +9,9 @@ const on = (fnName, middlewareFn) => {
 
 const execMiddleware = (fnName, data) => {
   if (!middleware[fnName]) {
-    return Promise.resolve();
+    return Promise.resolve(data);
   }
-  return Promise.all(middleware[fnName].map((fn) => (fn())))
+  return Promise.all(middleware[fnName].map((fn) => (fn(data))))
     .then(() => { return data; });
 };
 

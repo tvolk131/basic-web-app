@@ -1,5 +1,6 @@
 const elasticSearch = require('elasticsearch');
-const index = process.env.ELASTICSEARCH_INDEX;
+const db = require('../database');
+const index = process.env.ELASTICSEARCH_INDEX.toLowerCase();
 const client = elasticSearch.Client({
   host: process.env.ELASTICSEARCH_HOST,
   log: 'error'
@@ -41,8 +42,25 @@ const search = (data) => {
   });
 };
 
+const cleanObj = (obj) => {
+  let cleanedObj = {
+    ...obj
+  };
+  if (cleanedObj._id) {
+    cleanedObj.id = cleanedObj._id;
+    delete cleanedObj._id;
+  }
+  return cleanedObj;
+};
+
+const init = () => {
+  db.on('User.create', (user) => (indexData({type: 'user', id: user.id, data: cleanObj(user)})));
+  db.on('User.setName', (user) => (indexData({type: 'user', id: user.id, data: cleanObj(user)})));
+};
+
 module.exports = {
   indexData,
   deleteData,
-  search
+  search,
+  init
 };

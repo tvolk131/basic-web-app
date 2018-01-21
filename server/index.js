@@ -15,6 +15,9 @@ const compression = require('compression');
 const session = require('express-session');
 const graphQLSchema = require('./graphql');
 const expressGraphQL = require('express-graphql');
+const elasticsearch = require('../elasticsearch');
+
+elasticsearch.init();
 
 const shouldCompress = (req, res) => {
   if (req.headers['x-no-compression']) {
@@ -63,15 +66,24 @@ app.get('*/bundle.js', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/bundle.js'));
 });
 app.get('/*', (req, res) => {
-  db.Friend.getAll(req.user.id)
-    .then(({sent, received, friends}) => {
-      res.render('index', {
-        user: JSON.stringify(req.user || null),
-        friends: JSON.stringify(friends),
-        requestsSent: JSON.stringify(sent),
-        requestsReceived: JSON.stringify(received)
+  if (req.user) {
+    db.Friend.getAll(req.user.id)
+      .then(({sent, received, friends}) => {
+        res.render('index', {
+          user: JSON.stringify(req.user),
+          friends: JSON.stringify(friends),
+          requestsSent: JSON.stringify(sent),
+          requestsReceived: JSON.stringify(received)
+        });
       });
+  } else {
+    res.render('index', {
+      user: JSON.stringify(null),
+      friends: JSON.stringify([]),
+      requestsSent: JSON.stringify([]),
+      requestsReceived: JSON.stringify([])
     });
+  }
 });
 
 let http = require('http').Server(app);
