@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
+const { execMiddleware } = require('../middleware');
 
 const User = new Schema({
   name: String,
@@ -27,7 +28,7 @@ const create = ({name, oAuthProvider, oAuthId}) => {
         resolve(user);
       }
     });
-  });
+  }).then((data) => (execMiddleware('User.create', data)));
 };
 
 const get = ({id, oAuthProvider, oAuthId}) => {
@@ -48,7 +49,7 @@ const get = ({id, oAuthProvider, oAuthId}) => {
         resolve(user);
       }
     });
-  });
+  }).then((data) => (execMiddleware('User.get', data)));
 };
 
 const setName = ({id, oAuthId, oAuthProvider}, name) => {
@@ -71,7 +72,7 @@ const setName = ({id, oAuthId, oAuthProvider}, name) => {
         resolve(!!results.nModified);
       }
     });
-  });
+  }).then((data) => (execMiddleware('User.setName', data)));
 };
 
 const mapFromIds = (userIds) => {
@@ -87,7 +88,7 @@ const mapFromIds = (userIds) => {
         resolve(users);
       }
     });
-  });
+  }).then((data) => (execMiddleware('User.mapFromIds', data)));
 };
 
 module.exports = {
