@@ -15,10 +15,8 @@ const compression = require('compression');
 const session = require('express-session');
 const graphQLSchema = require('./graphql');
 const expressGraphQL = require('express-graphql');
-const elasticsearch = require('../elasticsearch');
 const secret = process.env.SESSION_SECRET;
 
-elasticsearch.init();
 
 const shouldCompress = (req, res) => {
   if (req.headers['x-no-compression']) {
@@ -27,6 +25,9 @@ const shouldCompress = (req, res) => {
   }
   return compression.filter(req, res);
 };
+
+// Initialize elasticsearch middleware
+require('../elasticsearch').init();
 
 // Initialize passport strategies
 require('./auth')(db.User);
