@@ -1,52 +1,24 @@
 {
   "users": [
     {
-      "id": 1234,
-      "googleId": null,
       "name": "Hello World",
-      "email": "hello@world.com",
-      "password": "test"
+      "oAuthProvider": "google",
+      "oAuthId": 1234
     },
     {
-      "id": 123456789,
-      "googleId": null,
       "name": "Test Person",
-      "email": "test@person.com",
-      "password": "test"
+      "oAuthProvider": "google",
+      "oAuthId": 123456789
     },
     {
-      "id": 12345,
-      "googleId": null,
       "name": "Test Person",
-      "email": "example@gmail.com",
-      "password": "test"
+      "oAuthProvider": "google",
+      "oAuthId": 12345
     },
     {
-      "id": 12344445,
-      "googleId": null,
       "name": "Test Person",
-      "email": "exampleeeeeee@gmail.com",
-      "password": "test"
-    }
-  ],
-  "messages": [
-    {
-      "id": 1,
-      "senderEmail": "hello@world.com",
-      "receiverEmail": "test@person.com",
-      "text": "this is a test message"
-    }
-  ],
-  "cardpacks": [
-    {
-      "id": 1,
-      "name": "test_cardpack",
-      "ownerId": 1234
-    },
-    {
-      "id": 2,
-      "name": "test_cardpack_two",
-      "ownerId": 12345
+      "oAuthProvider": "google",
+      "oAuthId": 12344445
     }
   ]
 }
