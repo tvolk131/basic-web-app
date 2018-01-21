@@ -16,6 +16,7 @@ const session = require('express-session');
 const graphQLSchema = require('./graphql');
 const expressGraphQL = require('express-graphql');
 const elasticsearch = require('../elasticsearch');
+const secret = process.env.SESSION_SECRET;
 
 elasticsearch.init();
 
@@ -47,7 +48,7 @@ app.use(cookieParser());
 // Passport and sessions
 app.use(session({
   store: db.store,
-  secret: 'thisisasecret',
+  secret,
   resave: true,
   saveUninitialized: false
 }));
@@ -92,7 +93,7 @@ let io = require('socket.io')(http);
 // Setup passport authentication for web sockets
 io.use(passportSocketIo.authorize({
   key: 'connect.sid',
-  secret: 'thisisasecret',
+  secret,
   store: db.store,
   passport,
   cookieParser
