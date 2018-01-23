@@ -67,6 +67,9 @@ app.use('/', authRouter); // Middleware redirector
 app.get('*/bundle.js', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/bundle.js'));
 });
+app.get('*/vendor.js', (req, res) => {
+  res.sendFile(path.resolve(__dirname + '/../client/dist/vendor.js'));
+});
 app.get('/*', (req, res) => {
   if (req.user) {
     db.Friend.getAll(req.user.id)
