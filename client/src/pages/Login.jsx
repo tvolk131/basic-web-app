@@ -16,7 +16,7 @@ class Login extends Component {
 
   render() {
     return (
-      <div className='login center'>
+      <div className='center'>
         <h1>Login</h1>
         <GoogleButton className='btn' onClick={this.googleOAuthRedirect} />
       </div>
