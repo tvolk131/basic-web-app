@@ -2,21 +2,10 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { routerMiddleware } from 'react-router-redux';
 import createSocketIoMiddleware from 'redux-socket.io';
 import rootReducer from './modules';
-import io from 'socket.io-client';
-const socket = io();
+import initialState from './initialState';
+const { socket } = initialState.global;
 const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
 
-const initialState = {
-  global: {
-    ...window.__PRELOADED_STATE__.global,
-    socket,
-    statusMessage: '',
-    statusVisible: false
-  },
-  friend: {
-    ...window.__PRELOADED_STATE__.friend
-  }
-};
 const enhancers = [];
 const middleware = [
   socketIoMiddleware
