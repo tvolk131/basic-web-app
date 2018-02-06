@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import FriendManager from '../components/FriendManager.jsx';
 
 class Home extends Component {
   constructor(props) {
@@ -15,6 +16,7 @@ class Home extends Component {
     return (
       <div className="content-wrap">
         Homepage
+        <FriendManager/>
       </div>
     ); 
   }
