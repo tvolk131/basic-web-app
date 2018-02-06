@@ -6,7 +6,6 @@ module.exports.openSocket = (socket) => {
     sockets[socket.request.user.id] = sockets[socket.request.user.id] || [];
     sockets[socket.request.user.id].push(socket);
   }
-  // TODO - Add event listeners here
 };
 
 module.exports.closeSocket = (socket) => {
