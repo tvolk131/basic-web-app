@@ -29,21 +29,20 @@ module.exports = (userModel) => {
       process.nextTick(() => {
         User.get({oAuthProvider: 'google', oAuthId: profile.id})
           .then((user) => {
-            if (user) {
-              return done(null, user);
-            } else {
-              User.create({
-                name: profile.name.givenName + ' ' + profile.name.familyName,
-                oAuthProvider: 'google',
-                oAuthId: profile.id
-              })
-                .then((newUser) => {
-                  return done(null, newUser);
-                });
-            }
+            return done(null, user);
           })
           .catch((err) => {
-            return done(err);
+            User.create({
+              name: profile.name.givenName + ' ' + profile.name.familyName,
+              oAuthProvider: 'google',
+              oAuthId: profile.id
+            })
+              .then((newUser) => {
+                return done(null, newUser);
+              })
+              .catch((err) => {
+                return done(err);
+              });
           });
       });
     }

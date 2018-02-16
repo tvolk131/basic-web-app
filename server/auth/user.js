@@ -7,11 +7,10 @@ module.exports = (userModel) => {
   });
   passport.deserializeUser((id, done) => {
     User.get({id}).then((user) => {
-      if (user) {
-        done(null, user);
-      } else {
+      done(null, user);
+    })
+      .catch((err) => {
         done(null, null);
-      }
-    });
+      });
   });
 };
