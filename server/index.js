@@ -6,7 +6,6 @@ const passport = require('passport');
 const db = require('../database');
 const url = require('url');
 const path = require('path');
-const apiRouter = require('./apiRoutes');
 const cookieParser = require('cookie-parser');
 const authRouter = require('./authRouter.js');
 const passportSocketIo = require('passport.socketio');
@@ -25,9 +24,6 @@ const shouldCompress = (req, res) => {
   }
   return compression.filter(req, res);
 };
-
-// Initialize elasticsearch middleware
-require('../elasticsearch').init();
 
 // Initialize passport strategies
 require('./auth')(db.User);
@@ -60,7 +56,6 @@ app.use(passport.session());
 app.use('/graphql', expressGraphQL((request, response, graphQLParams) => (
   {schema: graphQLSchema, graphiql: !(process.env.NODE_ENV === 'production')}
 )));
-app.use('/api', apiRouter(socketHandler));
 app.use('/', authRouter); // Middleware redirector
 
 // Serve static files
