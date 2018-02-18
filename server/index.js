@@ -1,10 +1,14 @@
 require('dotenv').config();
+if (!['development', 'test', 'production'].includes(process.env.NODE_ENV)) {
+  throw new Error('NODE_ENV must be either development, test, or production');
+}
 
 const fs = require('fs');
 const html = fs.readFileSync(`${__dirname}/../client/dist/index.html`).toString();
 const vendor = fs.readFileSync(`${__dirname}/../client/dist/vendor.js`).toString();
 const bundle = fs.readFileSync(`${__dirname}/../client/dist/bundle.js`).toString();
-
+const password = process.env.SESSION_SECRET;
+const isProduction = process.env.NODE_ENV === 'production';
 const port = process.env.PORT;
 const Hapi = require('hapi');
 const server = new Hapi.Server();
@@ -14,8 +18,8 @@ server.register({
   register: require('yar'),
   options: {
     cookieOptions: {
-      password: 'thisisapasswordthisisapasswordthisisapassword',
-      isSecure: false
+      password,
+      isSecure: isProduction
     }
   }
 });
@@ -23,11 +27,11 @@ server.register({
 server.register(require('bell'), (err) => {
   server.auth.strategy('google', 'bell', {
     provider: 'google',
-    password: 'thisisapasswordthisisapasswordthisisapassword',
+    password,
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     location: server.info.uri,
-    isSecure: false
+    isSecure: isProduction
   });
 
   server.route({
