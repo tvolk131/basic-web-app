@@ -10,19 +10,11 @@ const bundle = fs.readFileSync(`${__dirname}/../client/dist/bundle.js`).toString
 const password = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === 'production';
 const port = process.env.PORT;
+const db = require('../database');
+const jwt = require('jsonwebtoken');
 const Hapi = require('hapi');
 const server = new Hapi.Server();
 server.connection({port, host: 'localhost'});
-
-server.register({
-  register: require('yar'),
-  options: {
-    cookieOptions: {
-      password,
-      isSecure: isProduction
-    }
-  }
-});
 
 server.register(require('bell'), (err) => {
   server.auth.strategy('google', 'bell', {
@@ -32,6 +24,12 @@ server.register(require('bell'), (err) => {
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     location: server.info.uri,
     isSecure: isProduction
+  });
+
+  server.state('session', {
+    isSecure: isProduction,
+    encoding: 'base64json',
+    path: '/'
   });
 
   server.route({
@@ -47,8 +45,11 @@ server.register(require('bell'), (err) => {
           return reply('Authentication failed due to: ' + request.auth.error.message);
         }
         // TODO - Account lookup/registration
-        request.yar.set('user', {id: request.auth.credentials.profile.id, provider: request.auth.credentials.provider});
-        return reply.redirect('/');
+        const accountData = {id: request.auth.credentials.profile.id, provider: request.auth.credentials.provider};
+        const token = jwt.sign(accountData, password, {
+          expiresIn: 10
+        });
+        return reply.redirect('/').state('session', token);
       }
     }
   });
@@ -58,13 +59,25 @@ server.route([
   {
     method: 'GET',
     path: '/{any*}',
-    handler: (request, reply) => {
-      console.log(request.yar.get('user'));
-      console.log(request.auth);
+    handler: async (request, reply) => {
       let user = null;
       let friends = [];
       let requestsSent = [];
       let requestsReceived = [];
+
+      let tokenData;
+      try {
+        tokenData = jwt.verify(request.state.session, password);
+      } catch (err) {
+        // Token has expired or does not exist
+      }
+      if (tokenData) {
+        user = await db.User.get({oAuthId: tokenData.id, oAuthProvider: tokenData.provider});
+        friends = await db.Friend.getFriends(user.id);
+        requestsSent = await db.Friend.getSentRequests(user.id);
+        requestsReceived = await db.Friend.getReceivedRequests(user.id);
+      }
+      
       reply(`<script>window.__PRELOADED_STATE__ = {global: {user: ${JSON.stringify(user)}}, friend: {friends: ${JSON.stringify(friends)}, requestsSent: ${JSON.stringify(requestsSent)}, requestsReceived: ${JSON.stringify(requestsReceived)}}}</script>` + html);
     }
   },
@@ -86,8 +99,7 @@ server.route([
     method: 'GET',
     path: '/logout',
     handler: (request, reply) => {
-      request.yar.reset();
-      reply.redirect('/login');
+      reply.redirect('/login').unstate('session');
     }
   }
 ]);

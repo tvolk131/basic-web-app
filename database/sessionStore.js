@@ -1,5 +1,5 @@
-const uri = process.env.DB_HOST;
-const session = require('express-session');
-const MongoDBStore = require('connect-mongodb-session')(session);
+// const uri = process.env.DB_HOST;
+// const session = require('express-session');
+// const MongoDBStore = require('connect-mongodb-session')(session);
 
-module.exports = new MongoDBStore({uri, collection: 'sessions'});
+// module.exports = new MongoDBStore({uri, collection: 'sessions'});
