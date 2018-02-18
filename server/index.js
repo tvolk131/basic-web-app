@@ -40,15 +40,23 @@ server.register(require('bell'), (err) => {
         strategy: 'google',
         mode: 'try'
       },
-      handler: (request, reply) => {
+      handler: async (request, reply) => {
         if (!request.auth.isAuthenticated) {
           return reply('Authentication failed due to: ' + request.auth.error.message);
         }
-        // TODO - Account lookup/registration
-        const accountData = {id: request.auth.credentials.profile.id, provider: request.auth.credentials.provider};
-        const token = jwt.sign(accountData, password, {
+
+        // Account lookup/registration
+        const userData = {
+          name: request.auth.credentials.profile.displayName,
+          oAuthId: request.auth.credentials.profile.id,
+          oAuthProvider: request.auth.credentials.provider
+        };
+        await db.User.findOrCreate(userData);
+        delete userData.name;
+        const token = jwt.sign(userData, password, {
           expiresIn: 10
         });
+
         return reply.redirect('/').state('session', token);
       }
     }
@@ -72,7 +80,7 @@ server.route([
         // Token has expired or does not exist
       }
       if (tokenData) {
-        user = await db.User.get({oAuthId: tokenData.id, oAuthProvider: tokenData.provider});
+        user = await db.User.get({oAuthId: tokenData.oAuthId, oAuthProvider: tokenData.oAuthProvider});
         friends = await db.Friend.getFriends(user.id);
         requestsSent = await db.Friend.getSentRequests(user.id);
         requestsReceived = await db.Friend.getReceivedRequests(user.id);

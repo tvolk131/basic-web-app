@@ -40,8 +40,17 @@ const setName = ({id, oAuthId, oAuthProvider}, name) => {
   // TODO - Implement
 };
 
+const findOrCreate = async ({name, oAuthId, oAuthProvider}) => {
+  try {
+    await create({name, oAuthId, oAuthProvider});
+  } catch (e) {
+    await get({oAuthId, oAuthProvider});
+  }
+};
+
 module.exports = {
   create,
   get,
-  setName
+  setName,
+  findOrCreate
 };
