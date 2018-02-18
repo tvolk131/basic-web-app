@@ -15,23 +15,11 @@ const getReceivedRequests = (userId) => {
   return axios.get(`/user/${userId}/friends/requests/received`).then(({data}) => data);
 };
 
-const getAll = (userId) => {
-  let friends;
-  let sent;
-  let received;
-  return getFriends(userId)
-    .then((data) => {
-      friends = data;
-      return getSentRequests(userId);
-    })
-    .then((data) => {
-      sent = data;
-      return getReceivedRequests(userId);
-    })
-    .then((data) => {
-      received = data;
-    })
-    .then(() => { return {friends, sent, received}; });
+const getAll = async (userId) => {
+  const friends = await getFriends(userId);
+  const sent = await getSentRequests(userId);
+  const received = await getReceivedRequests(userId);
+  return { friends, sent, received };
 };
 
 const addUser = (senderId, receiverId) => {
