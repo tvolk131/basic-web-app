@@ -6,17 +6,6 @@ const db = require('../database');
 const authRouter = require('./authRouter.js');
 const passportSocketIo = require('passport.socketio');
 const socketHandler = require('./socketHandler.js');
-const session = require('express-session');
-const graphQLSchema = require('./graphql');
-const expressGraphQL = require('express-graphql');
-
-let app = express();
-
-// Setup auth
-app.use('/graphql', expressGraphQL((request, response, graphQLParams) => (
-  {schema: graphQLSchema, graphiql: !(process.env.NODE_ENV === 'production')}
-)));
-app.use('/', authRouter); // Middleware redirector
 
 let http = require('http').Server(app);
 let io = require('socket.io')(http);

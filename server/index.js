@@ -7,12 +7,15 @@ const fs = require('fs');
 const html = fs.readFileSync(`${__dirname}/../client/dist/index.html`).toString();
 const vendor = fs.readFileSync(`${__dirname}/../client/dist/vendor.js`).toString();
 const bundle = fs.readFileSync(`${__dirname}/../client/dist/bundle.js`).toString();
+
 const password = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === 'production';
 const port = process.env.PORT;
-const db = require('../database');
-const jwt = require('jsonwebtoken');
-const Hapi = require('hapi');
+
+const db              = require('../database');
+const jwt             = require('jsonwebtoken');
+const Hapi            = require('hapi');
+
 const server = new Hapi.Server();
 server.connection({port, host: 'localhost'});
 
@@ -61,6 +64,21 @@ server.register(require('bell'), (err) => {
       }
     }
   });
+});
+
+server.register({
+  register: require('hapi-graphql'),
+  options: {
+    query: {
+      schema: require('./graphql'),
+      graphiql: !isProduction,
+      pretty: !isProduction
+    },
+    route: {
+      path: '/graphql',
+      config: {}
+    }
+  }
 });
 
 server.route([
