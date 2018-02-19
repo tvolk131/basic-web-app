@@ -54,7 +54,7 @@ server.register(require('bell'), (err) => {
         await db.User.findOrCreate(userData);
         delete userData.name;
         const token = jwt.sign(userData, password, {
-          expiresIn: 10
+          expiresIn: parseInt(process.env.JWT_TIMEOUT_SECONDS)
         });
 
         return reply.redirect('/').state('session', token);
