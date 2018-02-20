@@ -11,7 +11,9 @@ const bundle = fs.readFileSync(`${__dirname}/../client/dist/bundle.js`).toString
 const password = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === 'production';
 const port = process.env.PORT;
+const cookieName = 'session';
 
+const socketHandler   = require('./socketHandler');
 const db              = require('../database');
 const jwt             = require('jsonwebtoken');
 const Hapi            = require('hapi');
@@ -29,7 +31,7 @@ server.register(require('bell'), (err) => {
     isSecure: isProduction
   });
 
-  server.state('session', {
+  server.state(cookieName, {
     isSecure: isProduction,
     encoding: 'base64json',
     path: '/'
@@ -60,7 +62,7 @@ server.register(require('bell'), (err) => {
           expiresIn: parseInt(process.env.JWT_TIMEOUT_SECONDS)
         });
 
-        return reply.redirect('/').state('session', token);
+        return reply.redirect('/').state(cookieName, token);
       }
     }
   });
@@ -93,7 +95,7 @@ server.route([
 
       let tokenData;
       try {
-        tokenData = jwt.verify(request.state.session, password);
+        tokenData = jwt.verify(request.state[cookieName], password);
       } catch (err) {
         // Token has expired or does not exist
       }
@@ -125,11 +127,38 @@ server.route([
     method: 'GET',
     path: '/logout',
     handler: (request, reply) => {
-      reply.redirect('/login').unstate('session');
+      reply.redirect('/login').unstate(cookieName);
     }
   }
 ]);
 
 const io = require('socket.io')(server.listener);
+
+io.use(async (socket, next) => {
+  if (socket.handshake.headers.cookie) {
+    let cookie = socket.handshake.headers.cookie;
+    cookie = cookie
+      .split('; ')
+      .find(cookie => cookie.startsWith(`${cookieName}=`));
+    if (cookie) {
+      cookie = cookie.split(`${cookieName}=`)[1];
+      cookie = Buffer.from(cookie, 'base64').toString();
+      cookie = cookie.substring(1, cookie.length - 1);
+      try {
+        socket.request.user = await db.User.get(jwt.verify(cookie, password));
+      } catch (e) {
+        socket.request.user = null;
+      }
+    }
+  }
+  next();
+});
+
+io.on('connection', (socket) => {
+  socketHandler.openSocket(socket);
+  socket.on('disconnect', () => {
+    socketHandler.closeSocket(socket);
+  });
+});
 
 server.start().then(() => { console.log(`Server is running on port ${port}`); });

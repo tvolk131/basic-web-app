@@ -1,16 +1,16 @@
 let sockets = {};
 
 module.exports.openSocket = (socket) => {
-  console.log('A user has connected');
-  if (socket.request.user.id) {
+  if (socket.request.user) {
+    console.log('A user has connected');
     sockets[socket.request.user.id] = sockets[socket.request.user.id] || [];
     sockets[socket.request.user.id].push(socket);
   }
 };
 
 module.exports.closeSocket = (socket) => {
-  console.log('A user has disconnected');
-  if (socket.request.user.id) {
+  if (socket.request.user) {
+    console.log('A user has disconnected');
     for (let i = 0; i < sockets[socket.request.user.id].length; i++) {
       if (sockets[socket.request.user.id][i] === socket) {
         sockets[socket.request.user.id].splice(i, 1);
