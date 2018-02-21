@@ -3,6 +3,15 @@ if (!['development', 'test', 'production'].includes(process.env.NODE_ENV)) {
   throw new Error('NODE_ENV must be either development, test, or production');
 }
 
+const getToken = ({oAuthId, oAuthProvider}) => {
+  if (!(oAuthId && oAuthProvider)) {
+    throw new Error('Missing parameters');
+  }
+  return jwt.sign({oAuthId, oAuthProvider}, password, {
+    expiresIn: parseInt(process.env.JWT_TIMEOUT_SECONDS)
+  });
+};
+
 const fs = require('fs');
 const html = fs.readFileSync(`${__dirname}/../client/dist/index.html`).toString();
 const vendor = fs.readFileSync(`${__dirname}/../client/dist/vendor.js`).toString();
@@ -57,12 +66,7 @@ server.register(require('bell'), (err) => {
           oAuthProvider: request.auth.credentials.provider
         };
         await db.User.findOrCreate(userData);
-        delete userData.name;
-        const token = jwt.sign(userData, password, {
-          expiresIn: parseInt(process.env.JWT_TIMEOUT_SECONDS)
-        });
-
-        return reply.redirect('/').state(cookieName, token);
+        return reply.redirect('/').state(cookieName, getToken(userData));
       }
     }
   });
@@ -96,6 +100,10 @@ server.route([
       let tokenData;
       try {
         tokenData = jwt.verify(request.state[cookieName], password);
+        const secondsToExp = tokenData.exp - Math.floor(Date.now() / 1000);
+        if (secondsToExp <= process.env.JWT_TIMEOUT_SECONDS - process.env.JWT_MIN_REFRESH_DELAY_SECONDS) {
+          reply.state(cookieName, getToken(tokenData));
+        }
       } catch (err) {
         // Token has expired or does not exist
       }
